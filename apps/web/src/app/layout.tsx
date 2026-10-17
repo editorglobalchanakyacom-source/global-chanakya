@@ -82,6 +82,9 @@ export const metadata: Metadata = {
   robots: {
     index: true,
     follow: true,
+    "max-video-preview": -1,
+    "max-image-preview": "large",
+    "max-snippet": -1,
     googleBot: {
       index: true,
       follow: true,
@@ -92,6 +95,12 @@ export const metadata: Metadata = {
   },
   verification: {
     google: "VrGd2s0LCdRNrUkVXP2WS7oMOvKxAUD2qZE1Nsepl3A",
+    yandex: process.env.NEXT_PUBLIC_YANDEX_VERIFICATION || undefined,
+    other: {
+      ...(process.env.NEXT_PUBLIC_BING_VERIFICATION
+        ? { "msvalidate.01": process.env.NEXT_PUBLIC_BING_VERIFICATION }
+        : {}),
+    },
   },
   category: "news",
 };

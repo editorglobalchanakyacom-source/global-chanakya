@@ -55,9 +55,21 @@ export class PublishPipelineService {
         console.error("[PublishPipeline] Embedding generation failed:", embErr);
       }
 
+      // 3. Search Engine & AI Crawler Instant Notification (IndexNow + Google Indexing API)
+      try {
+        const { SITE_URL } = await import("@/constants");
+        const { submitToIndexNow } = await import("@/lib/seo/indexnow");
+        const { notifyGoogleIndexingAPI } = await import("@/lib/seo/indexing");
+        const blogUrl = `${SITE_URL}/blogs/${blog.slug}`;
 
-
-      // 4. Chunk Indexing (for Vector Search)
+        await Promise.allSettled([
+          submitToIndexNow(blogUrl),
+          notifyGoogleIndexingAPI(blogUrl, "URL_UPDATED")
+        ]);
+        console.log(`[PublishPipeline] Instant search notifications dispatched for: ${blogUrl}`);
+      } catch (pingErr) {
+        console.error("[PublishPipeline] Search engine notifications failed:", pingErr);
+      }
       try {
         const { semanticIndexerService } = await import("@/modules/seo/services/semanticIndexer.service");
         await semanticIndexerService.indexBlog(blogId);

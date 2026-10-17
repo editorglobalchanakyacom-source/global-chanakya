@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 import dbConnect from "@/lib/mongoose";
 import { Blog } from "@/lib/models/Blog";
+import { SITE_URL } from "@/constants";
 
 export async function GET() {
   await dbConnect();
 
   // Fetch only public blogs or expose only public fields of premium blogs
   const blogs = await Blog.find({ status: "published" })
-    .select("title slug aiSummary keyInsights faq citations entityRelations updatedAt")
+    .select("title slug excerpt aiSummary keyInsights faq citations entityRelations updatedAt")
     .sort({ publishAt: -1 })
     .limit(50)
     .lean();
@@ -22,11 +23,12 @@ Welcome to the machine-readable version of Global Chanakya. This endpoint expose
 
   blogs.forEach((blog: any) => {
     llmsTxt += `### ${blog.title}\n`;
-    llmsTxt += `- URL: https://www.globalchanakya.in/blogs/${blog.slug}\n`;
-    llmsTxt += `- Last Updated: ${new Date(blog.updatedAt).toISOString()}\n\n`;
+    llmsTxt += `- URL: ${SITE_URL}/blogs/${blog.slug}\n`;
+    llmsTxt += `- Last Updated: ${new Date(blog.updatedAt || Date.now()).toISOString()}\n\n`;
     
-    if (blog.aiSummary) {
-      llmsTxt += `**Summary:**\n${blog.aiSummary}\n\n`;
+    const summary = blog.aiSummary || blog.excerpt;
+    if (summary) {
+      llmsTxt += `**Summary:**\n${summary}\n\n`;
     }
     
     if (blog.keyInsights && blog.keyInsights.length > 0) {

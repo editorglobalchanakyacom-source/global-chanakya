@@ -1,12 +1,12 @@
-import { NextResponse } from 'next/server';
-import { SITE_URL } from '@/constants';
+import { renderSitemapIndexResponse } from '@/lib/seo/sitemap-index-generator';
 
 export const dynamic = 'force-dynamic';
 
 /**
- * /sitemap.xml → redirects to /sitemap-index.xml
- * This ensures Google Search Console can find the sitemap at the standard URL.
+ * /sitemap.xml
+ * Directly serves the valid Sitemap Index XML with HTTP 200 (no 301 redirect).
+ * Prevents Google Search Console and Bing Webmaster redirect failure errors.
  */
 export async function GET() {
-  return NextResponse.redirect(`${SITE_URL}/sitemap-index.xml`, 301);
+  return renderSitemapIndexResponse();
 }

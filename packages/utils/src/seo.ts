@@ -85,6 +85,17 @@ export function generateSeoMetadata({
     metadata.robots = {
       index: !parts.includes("noindex"),
       follow: !parts.includes("nofollow"),
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    };
+  } else {
+    metadata.robots = {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
     };
   }
 

@@ -338,6 +338,16 @@ export async function DELETE(req: NextRequest) {
     revalidatePath("/sitemap.xml", "layout");
     revalidatePath("/sitemap-index.xml");
 
+    if (blogToDelete.slug) {
+      import("@/constants").then(({ SITE_URL }) => {
+        import("@/lib/seo/indexing").then(({ notifyGoogleIndexingAPI }) => {
+          notifyGoogleIndexingAPI(`${SITE_URL}/blogs/${blogToDelete.slug}`, "URL_DELETED").catch(e =>
+            console.error("[DELETE] Failed to notify Google Indexing API:", e)
+          );
+        });
+      }).catch(() => {});
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[DELETE /api/admin/blogs]", err);

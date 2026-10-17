@@ -10,16 +10,31 @@ export async function notifyGoogleIndexingAPI(url: string, type: IndexingAction 
   }
 
   try {
+    let clientEmail: string | undefined;
+    let privateKey: string | undefined;
+
     const credentialsStr = process.env.GOOGLE_APPLICATION_CREDENTIALS_JSON;
-    if (!credentialsStr) {
+    if (credentialsStr) {
+      try {
+        const credentials = JSON.parse(credentialsStr);
+        clientEmail = credentials.client_email;
+        privateKey = credentials.private_key;
+      } catch (err) {
+        console.error("Failed to parse GOOGLE_APPLICATION_CREDENTIALS_JSON:", err);
+      }
+    } else if (process.env.GSC_SERVICE_ACCOUNT_EMAIL && process.env.GSC_PRIVATE_KEY) {
+      clientEmail = process.env.GSC_SERVICE_ACCOUNT_EMAIL;
+      privateKey = process.env.GSC_PRIVATE_KEY;
+    }
+
+    if (!clientEmail || !privateKey) {
       console.warn("Google Indexing API credentials not found. Skipping.");
       return false;
     }
 
-    const credentials = JSON.parse(credentialsStr);
     const client = new JWT({
-      email: credentials.client_email,
-      key: credentials.private_key?.replace(/\\n/g, '\n'), // Handle escaped newlines
+      email: clientEmail,
+      key: privateKey.replace(/\\n/g, '\n'), // Handle escaped newlines
       scopes: ['https://www.googleapis.com/auth/indexing'],
     });
 
